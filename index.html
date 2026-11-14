@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Imperativ Test</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Manrope:wght@400;500;600;700&display=swap">
+<style>
+/* Layout: one centered column, a single question card at a time, progress strip on top */
+:root{
+  --bg:#eef1f6; --surface:#ffffff; --ink:#18213a; --muted:#5d667d; --line:#d8dde8;
+  --accent:#1f4fd6; --accent-ink:#ffffff; --gold:#e8a817;
+  --ok:#1b8a4b; --ok-bg:#e3f5ea; --bad:#c43a2f; --bad-bg:#fbe7e5; --warn-bg:#fff3d6;
+  --display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
+  --body:"Manrope", "Segoe UI", system-ui, sans-serif;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0f1424; --surface:#182037; --ink:#e8ecf6; --muted:#9aa4bd; --line:#2b3552;
+  --accent:#6f95ff; --accent-ink:#0f1424; --gold:#f2bd45;
+  --ok:#4fd08a; --ok-bg:#163526; --bad:#ff7d72; --bad-bg:#3a1c1d; --warn-bg:#3a2f14; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f1424; --surface:#182037; --ink:#e8ecf6; --muted:#9aa4bd; --line:#2b3552;
+  --accent:#6f95ff; --accent-ink:#0f1424; --gold:#f2bd45;
+  --ok:#4fd08a; --ok-bg:#163526; --bad:#ff7d72; --bad-bg:#3a1c1d; --warn-bg:#3a2f14; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html,body{margin:0}
+body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:20px 40px}
+.wrap{max-width:660px;margin:0 auto;display:flex;flex-direction:column;gap:18px}
+header{display:flex;flex-direction:column;gap:6px}
+.eyebrow{font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);font-weight:700;display:flex;align-items:center;gap:8px}
+.flag{display:inline-flex;width:22px;height:14px;border-radius:2px;overflow:hidden;flex-direction:column}
+.flag i{flex:1;display:block}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(28px,7vw,40px);line-height:1.1;margin:0;text-wrap:balance}
+h2{font-family:var(--display);font-size:20px;margin:0}
+.lead{color:var(--muted);margin:0}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:22px;display:flex;flex-direction:column;gap:18px;min-width:0}
+.btn{font:inherit;font-weight:700;border:0;border-radius:10px;padding:14px 20px;cursor:pointer;background:var(--accent);color:var(--accent-ink);text-align:center}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn.ghost{background:transparent;color:var(--accent);border:1.5px solid var(--line)}
+.btn:focus-visible,.opt:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
+.rules{margin:0;padding-left:20px;color:var(--muted);display:flex;flex-direction:column;gap:4px}
+.notice{border-radius:10px;padding:10px 12px;font-size:14px;background:var(--warn-bg)}
+.notice.bad{background:var(--bad-bg)}
+.progress{display:flex;justify-content:space-between;font-size:14px;color:var(--muted);font-weight:600;font-variant-numeric:tabular-nums}
+.bar{height:6px;background:var(--line);border-radius:3px;overflow:hidden}
+.bar span{display:block;height:100%;background:var(--accent);transition:width .3s}
+.hint{display:inline-flex;align-self:flex-start;gap:6px;font-size:13px;font-weight:700;background:var(--bg);border:1px solid var(--line);border-radius:999px;padding:4px 12px;color:var(--muted)}
+.hint b{color:var(--ink)}
+.sentence{font-family:var(--display);font-weight:600;font-size:clamp(20px,5vw,25px);line-height:1.4;margin:0}
+.gap{display:inline-block;min-width:60px;border-bottom:2.5px solid var(--gold);text-align:center;color:var(--accent)}
+.uz{color:var(--muted);margin:-8px 0 0;font-size:15px}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media (max-width:480px){.opts{grid-template-columns:1fr}}
+.opt{font:inherit;font-size:17px;font-weight:600;text-align:left;padding:14px 16px;border-radius:12px;border:1.5px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;display:flex;gap:10px;align-items:center}
+.opt:hover:not(:disabled){border-color:var(--accent)}
+.opt .k{font-size:12px;font-weight:700;color:var(--muted);width:22px;height:22px;border-radius:6px;border:1px solid var(--line);display:inline-grid;place-items:center;flex:none}
+.opt.ok{border-color:var(--ok);background:var(--ok-bg)}
+.opt.bad{border-color:var(--bad);background:var(--bad-bg)}
+.opt:disabled{cursor:default}
+.fb{border-radius:12px;padding:12px 14px;font-size:15px}
+.fb.ok{background:var(--ok-bg);border-left:4px solid var(--ok)}
+.fb.bad{background:var(--bad-bg);border-left:4px solid var(--bad)}
+.fb strong{display:block;margin-bottom:2px}
+.row{display:flex;justify-content:flex-end;gap:10px;flex-wrap:wrap}
+.score{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.score .big{font-family:var(--display);font-weight:800;font-size:64px;line-height:1;font-variant-numeric:tabular-nums}
+.score .of{font-size:20px;color:var(--muted);font-weight:600}
+.grade{display:inline-block;font-weight:700;padding:4px 12px;border-radius:999px;background:var(--bg);border:1px solid var(--line)}
+.meta{color:var(--muted);font-size:14px;margin:0}
+.review{display:flex;flex-direction:column;gap:10px;margin:0;padding:0;list-style:none}
+.review li{border:1px solid var(--line);border-radius:10px;padding:10px 12px;font-size:15px}
+.review .q{font-weight:600}
+.review .w{color:var(--bad)} .review .r{color:var(--ok);font-weight:700}
+.spin{width:18px;height:18px;border:2.5px solid var(--line);border-top-color:var(--accent);border-radius:50%;display:inline-block;animation:sp 0.8s linear infinite;vertical-align:-3px;margin-right:8px}
+@keyframes sp{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion:reduce){.bar span{transition:none}.spin{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="eyebrow"><span class="flag" aria-hidden="true"><i style="background:#111"></i><i style="background:#d00"></i><i style="background:#fc0"></i></span>Deutsch · A2</div>
+    <h1>Imperativ testi</h1>
+    <p class="lead" id="lead">Buyruq mayli bo‘yicha 50 ta savol: du, ihr, Sie va wir shakllari, ajraladigan va qaytma fe’llar.</p>
+  </header>
+
+  <!-- Start -->
+  <section class="card" id="start">
+    <h2 id="hello">Testga xush kelibsiz!</h2>
+    <div class="notice" id="practice" hidden>Bu sahifa Telegram’dan tashqarida ochildi, shuning uchun bu <b>mashq rejimi</b>: natija o‘qituvchiga yuborilmaydi. Haqiqiy test uchun botdagi «📝 Testni boshlash» tugmasini bosing.</div>
+    <ul class="rules">
+      <li>50 ta savol, har birida 4 ta javob, faqat bittasi to‘g‘ri.</li>
+      <li>Javobni tanlaganingizdan so‘ng izoh chiqadi.</li>
+      <li>Oxirgi savoldan keyin natija o‘qituvchiga avtomatik yuboriladi.</li>
+      <li>Testni yarmida yopsangiz, natija saqlanmaydi.</li>
+    </ul>
+    <div class="row"><button class="btn" id="go">Testni boshlash</button></div>
+  </section>
+
+  <!-- Quiz -->
+  <section id="quiz" hidden style="display:flex;flex-direction:column;gap:12px">
+    <div class="progress"><span id="pnum">Savol 1 / 50</span><span id="pscore">To‘g‘ri: 0</span></div>
+    <div class="bar"><span id="pbar" style="width:0%"></span></div>
+    <div class="card">
+      <span class="hint" id="hint"></span>
+      <p class="sentence" id="sent"></p>
+      <p class="uz" id="uz"></p>
+      <div class="opts" id="opts"></div>
+      <div id="fb" hidden></div>
+      <div class="row"><button class="btn" id="next" hidden>Keyingi savol</button></div>
+    </div>
+  </section>
+
+  <!-- Result -->
+  <section class="card" id="result" hidden>
+    <div class="eyebrow">Natija</div>
+    <div class="score"><span class="big" id="rs">0</span><span class="of">/ 50</span><span class="grade" id="rg"></span></div>
+    <p class="meta" id="sending"><span class="spin" aria-hidden="true"></span>Natija o‘qituvchiga yuborilmoqda… Xatolar tahlili botda chiqadi.</p>
+    <div class="notice bad" id="sendErr" hidden>Natijani yuborib bo‘lmadi. Bu sahifani yoping va testni botdagi pastki «📝 Testni boshlash» tugmasi orqali qayta oching.</div>
+    <div class="row" id="sendRow"><button class="btn" id="sendNow">Natijani yuborish</button></div>
+    <div id="rev" hidden style="display:flex;flex-direction:column;gap:10px">
+      <h2>Xatolar ustida ishlash</h2>
+      <ul class="review" id="rlist"></ul>
+      <div class="row"><button class="btn ghost" id="again">Qayta ishlash</button></div>
+    </div>
+  </section>
+</div>
+
+<script src="questions.js"></script>
+<script>
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const tg = window.Telegram && window.Telegram.WebApp;
+const inTg = !!(tg && tg.initData);
+
+function applyTheme(){ if(inTg) document.documentElement.dataset.theme = tg.colorScheme === "dark" ? "dark" : "light"; }
+if(tg){
+  try { tg.ready(); tg.expand(); } catch(e){}
+  applyTheme();
+  try { tg.onEvent("themeChanged", applyTheme); } catch(e){}
+}
+if(inTg){
+  const u = tg.initDataUnsafe && tg.initDataUnsafe.user;
+  if(u && u.first_name) $("hello").textContent = `Salom, ${u.first_name}!`;
+} else {
+  $("practice").hidden = false;
+}
+
+let order=[], i=0, score=0, ans=[], t0=0, sent=false;
+
+function shuffle(a){a=a.slice();for(let k=a.length-1;k>0;k--){const j=Math.floor(Math.random()*(k+1));[a[k],a[j]]=[a[j],a[k]];}return a}
+function grade(p){return p>=90?"A’lo (5)":p>=75?"Yaxshi (4)":p>=55?"Qoniqarli (3)":"Qoniqarsiz (2)"}
+function fill(q, plain){
+  const [p1, p2] = q.a.split(" … ");
+  const g = t => plain ? t : `<span class="gap">${esc(t)}</span>`;
+  let s = plain ? q.s : esc(q.s);
+  s = s.replace("___", g(p1));
+  s = s.replace("_2_", p2 ? g(p2) : "");
+  return plain ? s.replace(/\s+([,!])/g, "$1") : s;
+}
+function blank(q){ return esc(q.s).replace("___",'<span class="gap">?</span>').replace("_2_",'<span class="gap">…</span>'); }
+
+$("go").onclick = start;
+$("again").onclick = () => { $("result").hidden = true; start(); };
+
+function start(){
+  order = shuffle(Q.map((_,k)=>k)); i=0; score=0; ans=new Array(Q.length).fill(""); t0=Date.now(); sent=false;
+  $("start").hidden = true; $("quiz").hidden = false;
+  if(inTg){ try { tg.enableClosingConfirmation(); } catch(e){} }
+  show();
+}
+
+function show(){
+  const q = Q[order[i]];
+  $("pnum").textContent = `Savol ${i+1} / ${Q.length}`;
+  $("pscore").textContent = `To‘g‘ri: ${score}`;
+  $("pbar").style.width = (i/Q.length*100)+"%";
+  const [who, verb] = q.h.split(" · ");
+  $("hint").innerHTML = `<b>${esc(who)}</b> · ${esc(verb)}`;
+  $("sent").innerHTML = blank(q);
+  $("uz").textContent = q.uz;
+  $("fb").hidden = true; $("next").hidden = true;
+  const box = $("opts"); box.innerHTML = "";
+  shuffle([q.a, ...q.o]).forEach((t,k) => {
+    const b = document.createElement("button");
+    b.className = "opt"; b.id = "opt"+k; b.dataset.v = t;
+    b.innerHTML = `<span class="k">${"ABCD"[k]}</span><span>${esc(t)}</span>`;
+    b.onclick = () => pick(b, q);
+    box.appendChild(b);
+  });
+  window.scrollTo({top:0});
+}
+
+function pick(btn, q){
+  const ok = btn.dataset.v === q.a;
+  document.querySelectorAll(".opt").forEach(b => { b.disabled = true; if(b.dataset.v === q.a) b.classList.add("ok"); });
+  ans[order[i]] = btn.dataset.v;
+  if(ok) score++; else btn.classList.add("bad");
+  try { tg && tg.HapticFeedback && tg.HapticFeedback.notificationOccurred(ok ? "success" : "error"); } catch(e){}
+  $("sent").innerHTML = fill(q);
+  const fb = $("fb"); fb.hidden = false;
+  fb.className = "fb " + (ok ? "ok" : "bad");
+  fb.innerHTML = `<strong>${ok ? "To‘g‘ri!" : "Noto‘g‘ri. To‘g‘ri javob: " + esc(q.a)}</strong>${esc(q.e)}`;
+  $("pscore").textContent = `To‘g‘ri: ${score}`;
+  $("next").hidden = false;
+  $("next").textContent = i === Q.length-1 ? "Natijani ko‘rish" : "Keyingi savol";
+  $("next").focus();
+}
+$("next").onclick = () => { i++; if(i < Q.length) show(); else finish(); };
+
+function finish(){
+  $("quiz").hidden = true; $("result").hidden = false;
+  $("rs").textContent = score;
+  const p = Math.round(score/Q.length*100);
+  $("rg").textContent = `${p}% · ${grade(p)}`;
+  window.scrollTo({top:0});
+  if(inTg){
+    $("sending").hidden = false; $("sendRow").hidden = false; $("rev").hidden = true;
+    setTimeout(sendResult, 2500);
+  } else {
+    // mashq rejimi: natija shu yerda ko‘rsatiladi
+    $("sending").hidden = true; $("sendRow").hidden = true;
+    const list = $("rlist"); list.innerHTML = "";
+    Q.forEach((q,k) => {
+      if(ans[k] === q.a) return;
+      const li = document.createElement("li");
+      li.innerHTML = `<div class="q">${esc(fill(q, true))}</div><div><span class="w">Sizning javobingiz: ${esc(ans[k])}</span> · <span class="r">To‘g‘ri: ${esc(q.a)}</span></div>`;
+      list.appendChild(li);
+    });
+    $("rev").hidden = false;
+  }
+}
+
+function sendResult(){
+  if(sent) return;
+  sent = true;
+  const payload = JSON.stringify({ v:1, n:Q.length, t0, t1:Date.now(), a:ans });
+  try {
+    tg.disableClosingConfirmation();
+    tg.sendData(payload);   // Telegram sahifani yopadi va natijani botga beradi
+  } catch(e){
+    sent = false;
+    $("sending").hidden = true; $("sendErr").hidden = false;
+  }
+}
+$("sendNow").onclick = sendResult;
+</script>
+</body>
+</html>
